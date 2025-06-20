@@ -10,10 +10,7 @@ export default function AuthenticatedLayout({
   return (
     <SidebarProvider>
       <SideBar />
-      <main>
-        <SidebarTrigger />
-        {children}
-      </main>
+      <main className="flex-1 overflow-auto">{children}</main>
     </SidebarProvider>
   );
 }

@@ -1,17 +1,19 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import "../globals.css";
-import SideNav from "../components/SideNav/SideNav";
+import { SideBar } from "../components/SideBar/SideBar";
 
-export default function RootLayout({
+export default function AuthenticatedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex w-full h-screen justify-between items-center">
-      <SideNav />
-      {children}
-    </div>
+    <SidebarProvider>
+      <SideBar />
+      <main>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import TabSelect from "@/app/componentsMe/TabSelect/TabSelect";
+import TabSelect from "@/app/components/TabSelect/TabSelect";
 import { useState } from "react";
 import { signIn, signUp } from "./actions";
 

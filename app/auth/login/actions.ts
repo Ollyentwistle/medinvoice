@@ -12,9 +12,6 @@ interface AccountCredentails {
 
 export async function signIn({ email, password }: AccountCredentails) {
   const supabase = await createClient();
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email,
     password,

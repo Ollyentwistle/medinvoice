@@ -10,6 +10,7 @@ export default function LoginPage() {
   const [selectedOption, setSelectedOption] = useState<string>("Sign in");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showConfirmEmail, setShowConfirmEmail] = useState<boolean>(false);
 
   const welcomeSubText =
@@ -17,7 +18,11 @@ export default function LoginPage() {
       ? "Sign in to your account to continue"
       : "Sign up to create a new account";
 
+  const loadingButtonText =
+    selectedOption == "Sign in" ? "Signing in..." : "Signing up...";
+
   const handleClick = async () => {
+    setIsLoading(true);
     if (selectedOption === "Sign in") {
       await signIn({ email, password });
     } else {
@@ -28,6 +33,7 @@ export default function LoginPage() {
         console.log("Error");
       }
     }
+    setIsLoading(false);
   };
 
   const handleBackToLogin = () => {
@@ -81,10 +87,15 @@ export default function LoginPage() {
               />
             </div>
             <button
-              className="w-full bg-blue-600 h-[36px] rounded-md mt-[12px]"
+              className={`w-full ${
+                isLoading ? "bg-gray-300" : "bg-blue-600"
+              } h-[36px] rounded-md mt-[12px]`}
               onClick={handleClick}
+              disabled={isLoading}
             >
-              <p className="text-white">{selectedOption}</p>
+              <p className="text-white">
+                {isLoading ? loadingButtonText : selectedOption}
+              </p>
             </button>
           </div>
         </>

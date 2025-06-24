@@ -1,16 +1,16 @@
 import { PrismaClient } from "@/lib/generated/prisma/client";
-import { PatientBase } from "@/models/patients";
+import { PaymentBase } from "@/models/payments";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
   try {
-    const patients = await prisma.patient.findMany();
+    const payments = await prisma.payment.findMany();
 
-    return NextResponse.json(patients, { status: 200 });
+    return NextResponse.json(payments, { status: 200 });
   } catch (error) {
-    console.error("Error fetching patient:", error);
+    console.error("Error fetching payments:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -21,18 +21,20 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { email, name }: PatientBase = data;
+    const { patientId, serviceId, date, isPaid }: PaymentBase = data;
 
-    const newPatient = await prisma.patient.create({
+    const newPayment = await prisma.payment.create({
       data: {
-        email,
-        name,
+        patientId,
+        serviceId,
+        date,
+        isPaid,
       },
     });
 
-    return NextResponse.json(newPatient, { status: 201 });
+    return NextResponse.json(newPayment, { status: 201 });
   } catch (error) {
-    console.error("Error creating patient:", error);
+    console.error("Error creating payment:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -43,21 +45,23 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
-    const { id, email, name }: PatientBase = data;
+    const { id, patientId, serviceId, date, isPaid }: PaymentBase = data;
 
-    const updatedPatient = await prisma.patient.update({
+    const updatedPayment = await prisma.payment.update({
       where: {
         id,
       },
       data: {
-        email,
-        name,
+        patientId,
+        serviceId,
+        date,
+        isPaid,
       },
     });
 
-    return NextResponse.json(updatedPatient, { status: 201 });
+    return NextResponse.json(updatedPayment, { status: 201 });
   } catch (error) {
-    console.error("Error updating patient:", error);
+    console.error("Error updating payment:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -70,7 +74,7 @@ export async function DELETE(req: NextRequest) {
     const data = await req.json();
     const { id } = data;
 
-    const res = await prisma.patient.delete({
+    const res = await prisma.payment.delete({
       where: {
         id,
       },
@@ -78,7 +82,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json(res, { status: 201 });
   } catch (error) {
-    console.error("Error deleting patient:", error);
+    console.error("Error deleting payment:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

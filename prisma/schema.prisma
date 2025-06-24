@@ -36,7 +36,7 @@ model Payment {
   id          Int       @id @default(autoincrement())
   patientId   Int
   serviceId   Int
-  date        DateTime
+  date        String
   isPaid      Boolean   @default(false)
   createdAt   DateTime  @default(now())
 

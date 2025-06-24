@@ -23,12 +23,7 @@ import {
   fetchPatients,
   updatePatient,
 } from "./patients.queries";
-
-export interface PatientBase {
-  id?: number;
-  name: string;
-  email: string;
-}
+import { PatientBase } from "@/models/patients";
 
 export default function PatientsPage() {
   const queryClient = useQueryClient();

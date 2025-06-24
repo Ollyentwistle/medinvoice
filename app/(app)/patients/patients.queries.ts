@@ -1,5 +1,5 @@
 import { Patient } from "@/lib/generated/prisma/client";
-import { PatientBase } from "./page";
+import { PatientBase } from "@/models/patients";
 
 export async function fetchPatients(): Promise<Patient[]> {
   const res = await fetch("/api/patients");

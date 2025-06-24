@@ -9,56 +9,59 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PatientBase } from "@/models/patients";
+import { ServiceBase } from "@/models/services";
 import { useEffect, useState } from "react";
 
-interface AddEditPatientModalProps {
+interface AddEditServiceModalProps {
   setIsOpen: (value: boolean) => void;
-  patientBase: PatientBase;
-  onSave: (patient: PatientBase) => void;
+  serviceBase: ServiceBase;
+  onSave: (patient: ServiceBase) => void;
   onCancel?: () => void;
 }
 
-export default function AddEditPatientModal({
+export default function AddEditServiceModal({
   setIsOpen,
-  patientBase,
+  serviceBase,
   onSave,
   onCancel,
-}: AddEditPatientModalProps) {
-  const [patient, setPatient] = useState<PatientBase>(patientBase);
+}: AddEditServiceModalProps) {
+  const [service, setService] = useState<ServiceBase>(serviceBase);
 
   useEffect(() => {
-    setPatient(patientBase);
-  }, [patientBase]);
+    setService(serviceBase);
+  }, [serviceBase]);
+
   return (
     <DialogContent>
       <DialogHeader>
         <DialogTitle>
-          {!patientBase.id ? "Add New Patient" : `Update ${patientBase.name}`}
+          {!serviceBase.id ? "Add New Service" : `Update ${serviceBase.name}`}
         </DialogTitle>
         <DialogDescription>
-          Enter the patient's details to
-          {!patientBase.id ? "add them to" : "update them in"} your database.
+          Enter the service's details to
+          {!serviceBase.id ? "add them to" : "update them in"} your database.
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
+          <Label htmlFor="name">Service Name</Label>
           <Input
             id="name"
-            value={patient.name}
-            onChange={(e) => setPatient({ ...patient, name: e.target.value })}
-            placeholder="Enter patient's full name"
+            value={service.name}
+            onChange={(e) => setService({ ...service, name: e.target.value })}
+            placeholder="Enter service name"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Price</Label>
           <Input
-            id="email"
-            type="email"
-            value={patient.email}
-            onChange={(e) => setPatient({ ...patient, email: e.target.value })}
-            placeholder="patient@email.com"
+            id="price"
+            type="number"
+            value={service.price}
+            onChange={(e) =>
+              setService({ ...service, price: Number(e.target.value) })
+            }
+            placeholder="0"
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -71,8 +74,8 @@ export default function AddEditPatientModal({
           >
             Cancel
           </Button>
-          <Button onClick={() => onSave(patient)}>
-            {!patientBase.id ? "Add Patient" : "Update Patient"}
+          <Button onClick={() => onSave(service)}>
+            {!serviceBase.id ? "Add Service" : "Update Service"}
           </Button>
         </div>
       </div>

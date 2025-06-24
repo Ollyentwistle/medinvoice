@@ -1,16 +1,16 @@
 import { PrismaClient } from "@/lib/generated/prisma/client";
-import { PatientBase } from "@/models/patients";
+import { ServiceBase } from "@/models/services";
 import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
   try {
-    const patients = await prisma.patient.findMany();
+    const services = await prisma.service.findMany();
 
-    return NextResponse.json(patients, { status: 200 });
+    return NextResponse.json(services, { status: 200 });
   } catch (error) {
-    console.error("Error creating patient:", error);
+    console.error("Error creating service:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -21,18 +21,18 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { email, name }: PatientBase = data;
+    const { name, price }: ServiceBase = data;
 
-    const newPatient = await prisma.patient.create({
+    const newService = await prisma.service.create({
       data: {
-        email,
         name,
+        price,
       },
     });
 
-    return NextResponse.json(newPatient, { status: 201 });
+    return NextResponse.json(newService, { status: 201 });
   } catch (error) {
-    console.error("Error creating patient:", error);
+    console.error("Error creating service:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -43,21 +43,21 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const data = await req.json();
-    const { id, email, name }: PatientBase = data;
+    const { id, name, price }: ServiceBase = data;
 
-    const updatedPatient = await prisma.patient.update({
+    const updatedService = await prisma.service.update({
       where: {
         id,
       },
       data: {
-        email,
         name,
+        price,
       },
     });
 
-    return NextResponse.json(updatedPatient, { status: 201 });
+    return NextResponse.json(updatedService, { status: 201 });
   } catch (error) {
-    console.error("Error creating patient:", error);
+    console.error("Error creating service:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -70,7 +70,7 @@ export async function DELETE(req: NextRequest) {
     const data = await req.json();
     const { id } = data;
 
-    const res = await prisma.patient.delete({
+    const res = await prisma.service.delete({
       where: {
         id,
       },
@@ -78,7 +78,7 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json(res, { status: 201 });
   } catch (error) {
-    console.error("Error creating patient:", error);
+    console.error("Error creating service:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

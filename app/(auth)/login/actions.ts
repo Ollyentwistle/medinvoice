@@ -40,11 +40,11 @@ export async function signUp({ email, password }: AccountCredentails) {
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    redirect("/error");
+    console.log("error: ", error);
+    return false;
   }
 
-  revalidatePath("/", "layout");
-  redirect("/");
+  return true;
 }
 
 export async function signOut() {

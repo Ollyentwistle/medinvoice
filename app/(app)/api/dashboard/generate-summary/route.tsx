@@ -17,9 +17,12 @@ export async function POST(req: NextRequest) {
     overdueCount,
   }: GenerateSummaryProps = data;
 
+  const now = new Date();
+  const monthName = now.toLocaleString("default", { month: "long" });
+
   try {
     const prompt = `
-        Generate a concise monthly summary for a clinic with the following data:
+        Generate a concise monthly summary for a clinic for the month of ${monthName} with the following data:
         - Total earnings: £${totalEarnings}
         - Most popular service: ${
           mostPopularService

@@ -24,6 +24,7 @@ import {
   updatePatient,
 } from "./patients.queries";
 import { PatientBase } from "@/models/patients";
+import { useUser } from "@/context/UserContext";
 
 export default function PatientsPage() {
   const queryClient = useQueryClient();
@@ -33,6 +34,10 @@ export default function PatientsPage() {
     email: "",
     name: "",
   });
+
+  const { user } = useUser();
+
+  console.log(user, "<<<<<<<<<<<<");
 
   const { data: patients = [], isLoading } = useQuery({
     queryKey: ["patients"],

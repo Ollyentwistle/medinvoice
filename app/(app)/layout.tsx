@@ -5,6 +5,7 @@ import "../globals.css";
 import { SideBar } from "../components/SideBar/SideBar";
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { UserProvider } from "@/context/UserContext";
 
 export default function AuthenticatedLayout({
   children,
@@ -16,9 +17,11 @@ export default function AuthenticatedLayout({
   return (
     <SidebarProvider>
       <SideBar />
-      <QueryClientProvider client={queryClient}>
-        <main className="flex-1 overflow-auto">{children}</main>
-      </QueryClientProvider>
+      <UserProvider>
+        <QueryClientProvider client={queryClient}>
+          <main className="flex-1 overflow-auto">{children}</main>
+        </QueryClientProvider>
+      </UserProvider>
     </SidebarProvider>
   );
 }

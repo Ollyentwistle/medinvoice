@@ -24,7 +24,6 @@ import {
   fetchServices,
   updateService,
 } from "./services.queries";
-// import AddEditPatientModal from "./components/AddEditPatientModal";
 
 export default function ServicesPage() {
   const queryClient = useQueryClient();

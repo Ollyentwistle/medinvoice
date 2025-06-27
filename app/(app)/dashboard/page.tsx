@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,46 +10,115 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
-  TrendingUp,
-  Users,
   CreditCard,
   Sparkles,
+  TrendingUp,
+  Users,
 } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-
-const weeklyData = [
-  { week: "Week 1", earnings: 1200 },
-  { week: "Week 2", earnings: 1800 },
-  { week: "Week 3", earnings: 1400 },
-  { week: "Week 4", earnings: 2200 },
-  { week: "Week 5", earnings: 1900 },
-  { week: "Week 6", earnings: 2400 },
-];
+import { useState } from "react";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { fetchPayments } from "../payments/payments.queries";
+import { fetchServices } from "../services/services.queries";
 
 export default function DashboardPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiSummary, setAiSummary] = useState("");
 
+  const { data: payments = [] } = useQuery({
+    queryKey: ["payments"],
+    queryFn: fetchPayments,
+  });
+
+  const { data: services = [] } = useQuery({
+    queryKey: ["services"],
+    queryFn: fetchServices,
+  });
+
+  const totalEarnings = payments
+    .filter((p) => p.isPaid)
+    .reduce((sum, p) => {
+      const service = services.find((s) => s.id === p.serviceId);
+      return sum + (service?.price || 0);
+    }, 0);
+
+  const unpaidInvoices = payments.filter((p) => !p.isPaid);
+  const overdueInvoices = unpaidInvoices.filter((p) => {
+    const daysSince =
+      (new Date().getTime() - new Date(p.date).getTime()) /
+      (1000 * 60 * 60 * 24);
+    return daysSince > 14;
+  });
+
+  const topServiceData = (() => {
+    const countMap: Record<number, number> = {};
+    payments.forEach((p) => {
+      if (p.isPaid) countMap[p.serviceId] = (countMap[p.serviceId] || 0) + 1;
+    });
+    const topId = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0]?.[0];
+    const service = services.find((s) => s.id === Number(topId));
+    return service
+      ? {
+          name: service.name,
+          revenue: payments
+            .filter((p) => p.serviceId === service.id && p.isPaid)
+            .reduce((sum, p) => sum + (service.price || 0), 0),
+          count: countMap[service.id],
+        }
+      : null;
+  })();
+
+  // Weekly earnings (last 6 weeks)
+  const weeklyEarnings = (() => {
+    const result: { week: string; earnings: number }[] = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const start = new Date();
+      start.setDate(start.getDate() - i * 7);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+
+      const earnings = payments
+        .filter((p) => {
+          const d = new Date(p.date);
+          return p.isPaid && d >= start && d <= end;
+        })
+        .reduce((sum, p) => {
+          const s = services.find((s) => s.id === p.serviceId);
+          return sum + (s?.price || 0);
+        }, 0);
+
+      result.push({
+        week: `Week ${6 - i}`,
+        earnings,
+      });
+    }
+
+    return result;
+  })();
+
   const generateSummary = async () => {
     setIsGenerating(true);
-    // Simulate AI generation
+    const summary = `This month, your clinic earned £${totalEarnings}. ${
+      topServiceData
+        ? `The top service was ${topServiceData.name} with £${topServiceData.revenue} in revenue from ${topServiceData.count} treatments. `
+        : ""
+    }You currently have ${unpaidInvoices.length} unpaid invoices, including ${
+      overdueInvoices.length
+    } overdue.`;
+
     setTimeout(() => {
-      setAiSummary(
-        "This month shows strong performance with £2,400 in total earnings, representing a 15% increase from last month. Your top service, Whitening treatments, contributed £1,200 to revenue. Consider following up on the 4 unpaid invoices to improve cash flow."
-      );
+      setAiSummary(summary);
       setIsGenerating(false);
-    }, 2000);
+    }, 1000);
   };
 
   return (
@@ -65,13 +136,18 @@ export default function DashboardPage() {
       </div>
 
       {/* Alert Banner */}
-      <Alert className="border-amber-200 bg-amber-50">
-        <AlertTriangle className="h-4 w-4 text-amber-600" />
-        <AlertDescription className="text-amber-800">
-          <strong>3 invoices are overdue</strong> (more than 14 days) - Consider
-          following up with patients.
-        </AlertDescription>
-      </Alert>
+      {overdueInvoices.length > 0 && (
+        <Alert className="border-amber-200 bg-amber-50">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-800">
+            <strong>
+              {overdueInvoices.length} invoice
+              {overdueInvoices.length > 1 ? "s" : ""} are overdue
+            </strong>
+            (more than 14 days) – Consider following up with patients.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Metrics Cards */}
       <div className="grid gap-6 md:grid-cols-3">
@@ -83,8 +159,10 @@ export default function DashboardPage() {
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">£2,400</div>
-            <p className="text-xs text-slate-500 mt-1">+15% from last month</p>
+            <div className="text-3xl font-bold text-green-600">
+              £{totalEarnings}
+            </div>
+            {/* <p className="text-xs text-slate-500 mt-1">+15% from last month</p> */}
           </CardContent>
         </Card>
 
@@ -97,11 +175,18 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <div className="text-3xl font-bold text-slate-900">4</div>
+              <div className="text-3xl font-bold text-slate-900">
+                {unpaidInvoices.length}
+              </div>
               <Badge variant="destructive">Overdue</Badge>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              £680 total outstanding
+              £
+              {unpaidInvoices.reduce((sum, p) => {
+                const s = services.find((s) => s.id === p.serviceId);
+                return sum + (s?.price || 0);
+              }, 0)}{" "}
+              total outstanding
             </p>
           </CardContent>
         </Card>
@@ -114,10 +199,14 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">Whitening</div>
-            <p className="text-sm text-blue-600 font-medium">£1,200 revenue</p>
+            <div className="text-2xl font-bold text-slate-900">
+              {topServiceData?.name ?? "—"}
+            </div>
+            <p className="text-sm text-blue-600 font-medium">
+              £{topServiceData?.revenue ?? 0} revenue
+            </p>
             <p className="text-xs text-slate-500 mt-1">
-              12 treatments this month
+              {topServiceData?.count ?? 0} treatments this month
             </p>
           </CardContent>
         </Card>
@@ -142,7 +231,7 @@ export default function DashboardPage() {
             className="h-[300px]"
           >
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData}>
+              <BarChart data={weeklyEarnings}>
                 <XAxis dataKey="week" />
                 <YAxis />
                 <ChartTooltip content={<ChartTooltipContent />} />

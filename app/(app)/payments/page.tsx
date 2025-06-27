@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -18,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   Table,
   TableBody,
@@ -26,12 +29,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Search, Check } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Payment } from "@/lib/generated/prisma/client";
+import { PaymentBase } from "@/models/payments";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
 import { fetchPatients } from "../patients/patients.queries";
 import { fetchServices } from "../services/services.queries";
 import {
@@ -40,8 +42,6 @@ import {
   fetchPayments,
   updatePayment,
 } from "./payments.queries";
-import { PaymentBase } from "@/models/payments";
-import { Payment } from "@/lib/generated/prisma/client";
 
 export default function PaymentsPage() {
   const queryClient = useQueryClient();
@@ -53,6 +53,15 @@ export default function PaymentsPage() {
     date: new Date().toISOString().split("T")[0],
     isPaid: false,
   });
+
+  const resetPaymentBase = () => {
+    setPaymentBase({
+      patientId: -1,
+      serviceId: -1,
+      date: new Date().toISOString().split("T")[0],
+      isPaid: false,
+    });
+  };
 
   const { data: payments = [], isLoading: isLoadingPayments } = useQuery({
     queryKey: ["payments"],
@@ -74,6 +83,7 @@ export default function PaymentsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments"] });
       setIsAddModalOpen(false);
+      resetPaymentBase();
     },
   });
 
@@ -83,7 +93,7 @@ export default function PaymentsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["payments"] });
       setIsAddModalOpen(false);
-      // resetPatientBase();
+      resetPaymentBase();
     },
   });
 
@@ -94,12 +104,26 @@ export default function PaymentsPage() {
     },
   });
 
-  const filteredPayments = payments;
-  // payments.filter(
-  //   (payment) =>
-  //     payment.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     payment.serviceName.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+  const enrichedPayments = useMemo(() => {
+    return payments.map((payment) => {
+      const patient = patients.find((p) => p.id === payment.patientId);
+      const service = services.find((s) => s.id === payment.serviceId);
+      return {
+        ...payment,
+        patientName: patient?.name ?? "Unknown",
+        serviceName: service?.name ?? "Unknown",
+        servicePrice: service?.price ?? 0,
+      };
+    });
+  }, [payments, patients, services]);
+
+  const filteredPayments = useMemo(() => {
+    return enrichedPayments.filter(
+      (payment) =>
+        payment.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        payment.serviceName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [enrichedPayments, searchTerm]);
 
   const handleAddPayment = () => {
     if (paymentBase.patientId && paymentBase.serviceId) {
@@ -265,18 +289,16 @@ export default function PaymentsPage() {
               </TableRow>
             ) : (
               filteredPayments.map((payment) => {
-                var patient = patients.find((p) => p.id === payment.patientId);
-                var service = services.find((s) => s.id === payment.serviceId);
                 return (
                   <TableRow key={payment.id}>
                     <TableCell className="font-medium">
-                      {patient?.name}
+                      {payment.patientName}
                     </TableCell>
                     <TableCell className="text-slate-600">
-                      {service?.name}
+                      {payment.serviceName}
                     </TableCell>
                     <TableCell className="font-medium">
-                      £{service?.price}
+                      £{payment.servicePrice}
                     </TableCell>
                     <TableCell className="text-slate-600">
                       {new Date(payment.date).toLocaleDateString()}

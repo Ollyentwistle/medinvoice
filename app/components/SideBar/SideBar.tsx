@@ -1,5 +1,5 @@
 "use client";
-import { signOut } from "@/app/(auth)/login/actions";
+import { signOut } from "@/app/(auth)/auth/auth.actions";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,

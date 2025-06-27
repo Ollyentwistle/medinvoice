@@ -53,7 +53,7 @@ export function EmailConfirmCard({ onBackToLogin }: EmailConfirmationProps) {
           <div className="pt-4 border-t">
             <Button variant="ghost" onClick={onBackToLogin} className="w-full">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to login
+              Back to Sign in
             </Button>
           </div>
         </CardContent>

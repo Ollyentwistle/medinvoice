@@ -2,11 +2,12 @@
 
 import TabSelect from "@/app/components/TabSelect/TabSelect";
 import { useState } from "react";
-import { signIn, signUp } from "./actions";
+import { signIn, signUp } from "./auth.actions";
 import { Stethoscope } from "lucide-react";
 import { EmailConfirmCard } from "@/app/components/EmailConfirmCard/EmailConfirmCard";
+import { addUser, getUser } from "./auth.queries";
 
-export default function LoginPage() {
+export default function AuthPage() {
   const [selectedOption, setSelectedOption] = useState<string>("Sign in");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -24,12 +25,13 @@ export default function LoginPage() {
   const handleClick = async () => {
     setIsLoading(true);
     if (selectedOption === "Sign in") {
-      await signIn({ email, password });
+      const successful = await signIn({ email, password });
     } else {
       const successful = await signUp({ email, password });
       if (successful) {
         setShowConfirmEmail(true);
       } else {
+        // TODO - error toaster
         console.log("Error");
       }
     }

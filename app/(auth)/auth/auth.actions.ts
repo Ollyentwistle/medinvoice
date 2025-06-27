@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/utils/supabase/server";
+import { addUser, getUser } from "./auth.queries";
 
 interface AccountCredentails {
   email: string;
@@ -22,6 +23,8 @@ export async function signIn({ email, password }: AccountCredentails) {
   if (error) {
     redirect("/error");
   }
+
+  await addUserIfDoesntExist(email);
 
   revalidatePath("/", "layout"); // this will revalidate the nextjs cache
   redirect("/");
@@ -58,4 +61,14 @@ export async function signOut() {
 
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+export async function addUserIfDoesntExist(email: string) {
+  const user = await getUser(email);
+  console.log(user);
+  if (!!user) {
+    return;
+  }
+
+  return await addUser({ email });
 }

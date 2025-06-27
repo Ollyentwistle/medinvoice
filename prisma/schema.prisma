@@ -20,16 +20,16 @@ model Patient {
   id          Int       @id @default(autoincrement())
   email       String    @unique
   name        String
-  createdAt   DateTime  @default(now())
   payments  Payment[]
+  createdAt   DateTime  @default(now())
 }
 
 model Service {
   id          Int       @id @default(autoincrement())
   name        String    @unique
   price       Int
-  createdAt   DateTime  @default(now())
   payments  Payment[]
+  createdAt   DateTime  @default(now())
 }
 
 model Payment {
@@ -42,4 +42,11 @@ model Payment {
 
   patient   Patient   @relation(fields: [patientId], references: [id])
   service   Service   @relation(fields: [serviceId], references: [id])
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  role        String
+  createdAt   DateTime  @default(now())
 }

@@ -37,15 +37,19 @@ export async function updateSession(request: NextRequest) {
 
   if (!user) {
     // If user is not logged in and not already on a public path
-    if (!pathname.startsWith("/login") && !pathname.startsWith("/confirm")) {
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/login";
-      return NextResponse.redirect(loginUrl);
+    if (
+      !pathname.startsWith("/auth") &&
+      !pathname.startsWith("/confirm") &&
+      !pathname.startsWith("/api/users")
+    ) {
+      const authUrl = request.nextUrl.clone();
+      authUrl.pathname = "/auth";
+      return NextResponse.redirect(authUrl);
     }
   } else {
     // If user is logged in and trying to access login or auth, redirect to dashboard
     if (
-      pathname.startsWith("/login") ||
+      pathname.startsWith("/auth") ||
       pathname.startsWith("/confirm") ||
       pathname === "/"
     ) {

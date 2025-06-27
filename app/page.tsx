@@ -1,5 +1,5 @@
 "use client";
-import { signOut } from "./(auth)/login/actions";
+import { signOut } from "./(auth)/auth/auth.actions";
 
 export default function Home() {
   const handleSignOut = async () => {

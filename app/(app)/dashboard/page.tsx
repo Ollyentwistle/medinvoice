@@ -28,6 +28,7 @@ import { useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { fetchPayments } from "../payments/payments.queries";
 import { fetchServices } from "../services/services.queries";
+import { generateSummary } from "./dashboard.queries";
 
 export default function DashboardPage() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -58,22 +59,85 @@ export default function DashboardPage() {
     return daysSince > 14;
   });
 
-  const topServiceData = (() => {
+  const mostPopularServiceData = (() => {
     const countMap: Record<number, number> = {};
     payments.forEach((p) => {
       if (p.isPaid) countMap[p.serviceId] = (countMap[p.serviceId] || 0) + 1;
     });
-    const topId = Object.entries(countMap).sort((a, b) => b[1] - a[1])[0]?.[0];
-    const service = services.find((s) => s.id === Number(topId));
-    return service
-      ? {
-          name: service.name,
-          revenue: payments
-            .filter((p) => p.serviceId === service.id && p.isPaid)
-            .reduce((sum, p) => sum + (service.price || 0), 0),
-          count: countMap[service.id],
+
+    const maxCount = Math.max(...Object.values(countMap), 0);
+    if (maxCount === 0) return null; // no paid payments
+
+    const topIds = Object.entries(countMap)
+      .filter(([, count]) => count === maxCount)
+      .map(([serviceId]) => Number(serviceId));
+
+    const topServices = services.filter((s) => topIds.includes(s.id));
+
+    if (topServices.length === 0) return null;
+
+    const name =
+      topServices.length === 1
+        ? topServices[0].name
+        : topServices.map((s) => s.name).join(" & ");
+
+    const revenue = topServices.reduce((total, service) => {
+      const serviceRevenue = payments
+        .filter((p) => p.serviceId === service.id && p.isPaid)
+        .reduce((sum, p) => sum + (service.price || 0), 0);
+      return total + serviceRevenue;
+    }, 0);
+
+    return {
+      name,
+      revenue,
+      count: maxCount,
+      multiple: topServices.length > 1,
+    };
+  })();
+
+  const mostProfitableServiceData = (() => {
+    const revenueMap: Record<number, number> = {};
+
+    payments.forEach((p) => {
+      if (p.isPaid) {
+        const service = services.find((s) => s.id === p.serviceId);
+        if (service) {
+          revenueMap[p.serviceId] =
+            (revenueMap[p.serviceId] || 0) + (service.price || 0);
         }
-      : null;
+      }
+    });
+
+    const maxRevenue = Math.max(...Object.values(revenueMap), 0);
+    if (maxRevenue === 0) return null; // no revenue
+
+    const topIds = Object.entries(revenueMap)
+      .filter(([, revenue]) => revenue === maxRevenue)
+      .map(([serviceId]) => Number(serviceId));
+
+    const topServices = services.filter((s) => topIds.includes(s.id));
+    if (topServices.length === 0) return null;
+
+    const name =
+      topServices.length === 1
+        ? topServices[0].name
+        : topServices.map((s) => s.name).join(" & ");
+
+    // Total count of paid treatments for all tied top services
+    const count = topServices.reduce((total, service) => {
+      return (
+        total +
+        payments.filter((p) => p.serviceId === service.id && p.isPaid).length
+      );
+    }, 0);
+
+    return {
+      name,
+      revenue: maxRevenue,
+      count,
+      multiple: topServices.length > 1,
+    };
   })();
 
   // Weekly earnings (last 6 weeks)
@@ -105,20 +169,32 @@ export default function DashboardPage() {
     return result;
   })();
 
-  const generateSummary = async () => {
+  const handleGenerateSummary = async () => {
     setIsGenerating(true);
-    const summary = `This month, your clinic earned £${totalEarnings}. ${
-      topServiceData
-        ? `The top service was ${topServiceData.name} with £${topServiceData.revenue} in revenue from ${topServiceData.count} treatments. `
-        : ""
-    }You currently have ${unpaidInvoices.length} unpaid invoices, including ${
-      overdueInvoices.length
-    } overdue.`;
+    const summary = await generateSummary({
+      totalEarnings,
+      mostPopularService: mostPopularServiceData
+        ? {
+            name: mostPopularServiceData.name,
+            revenue: mostPopularServiceData.revenue,
+            count: mostPopularServiceData.count,
+            multiple: mostPopularServiceData.multiple || false,
+          }
+        : null,
+      mostProfitableService: mostProfitableServiceData
+        ? {
+            name: mostProfitableServiceData.name,
+            revenue: mostProfitableServiceData.revenue,
+            count: mostProfitableServiceData.count,
+            multiple: mostProfitableServiceData.multiple || false,
+          }
+        : null,
+      unpaidCount: unpaidInvoices.length,
+      overdueCount: overdueInvoices.length,
+    });
 
-    setTimeout(() => {
-      setAiSummary(summary);
-      setIsGenerating(false);
-    }, 1000);
+    setAiSummary(summary);
+    setIsGenerating(false);
   };
 
   return (
@@ -150,7 +226,7 @@ export default function DashboardPage() {
       )}
 
       {/* Metrics Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-600">
@@ -194,19 +270,44 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-slate-600">
-              Top Service
+              Most Profitable Service
+              {mostProfitableServiceData?.multiple ? "s" : ""}
             </CardTitle>
             <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-slate-900">
-              {topServiceData?.name ?? "—"}
+              {mostProfitableServiceData?.name ?? "—"}
             </div>
             <p className="text-sm text-blue-600 font-medium">
-              £{topServiceData?.revenue ?? 0} revenue
+              £{mostProfitableServiceData?.revenue ?? 0} revenue
             </p>
             <p className="text-xs text-slate-500 mt-1">
-              {topServiceData?.count ?? 0} treatments this month
+              {mostPopularServiceData?.count && !mostPopularServiceData.multiple
+                ? `From ${mostPopularServiceData?.count} treatments this month`
+                : ""}
+              {mostPopularServiceData?.multiple && "Earned each this month"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-slate-600">
+              Most Popular Service{mostPopularServiceData?.multiple ? "s" : ""}
+            </CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-slate-900">
+              {mostPopularServiceData?.name ?? "—"}
+            </div>
+            <p className="text-sm text-blue-600 font-medium">
+              £{mostPopularServiceData?.revenue ?? 0} revenue
+            </p>
+            <p className="text-xs text-slate-500 mt-1">
+              {mostPopularServiceData?.count ?? 0} treatments
+              {mostPopularServiceData?.multiple ? "each" : ""} this month
             </p>
           </CardContent>
         </Card>
@@ -255,8 +356,8 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Button
-            onClick={generateSummary}
-            disabled={isGenerating}
+            onClick={handleGenerateSummary}
+            disabled={isGenerating || !!aiSummary}
             className="w-full bg-blue-600 hover:bg-blue-500 sm:w-auto"
           >
             {isGenerating

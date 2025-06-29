@@ -1,9 +1,7 @@
 import { UserBase } from "@/models/users";
 
-const baseUrl = "http://localhost:3000";
-
 export async function addUser(data: UserBase) {
-  const res = await fetch(`${baseUrl}/api/users`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -16,10 +14,15 @@ export async function addUser(data: UserBase) {
 }
 
 export async function getUser(email: string) {
-  const res = await fetch(`${baseUrl}/api/users?email=${email}`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users?email=${email}`,
+    {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  console.log(res);
 
   if (!res.ok) throw new Error("Failed to fetch user");
   return res.json();

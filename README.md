@@ -19,4 +19,6 @@
 - Automated background tasks with Inngest to generate and store monthly summaries
 
 <br>
-Note: _This is a demo project intended to showcase core functionality and integration with modern technologies. It is not fully production-ready — features like robust error handling, loading states, comprehensive validation, and full test coverage are areas for future improvement._
+Note: 
+
+*This is a demo project intended to showcase core functionality and integration with modern technologies. It is not fully production-ready - features like robust error handling, loading states, comprehensive validation, and full test coverage are areas for future improvement.*

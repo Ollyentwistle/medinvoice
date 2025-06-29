@@ -12,9 +12,11 @@
 - **Background Tasks:** Inngest for scheduled monthly summary generation  
 
 ## Features
-- Full CRUD operations for Patients, Services, and Payments  
-- Secure user authentication and session management  
-- Role-based UI rendering and access control  
-- Engaging and useful dashboard insights such as most popular services, most profitable services, and outstanding payments
-- AI generated summaries for dynamic insights and suggestions
-- Automated background tasks to generate and store monthly summaries  
+- Full CRUD operations for Patients, Services, and Payments with role-based access control
+- Secure user authentication and session management using Supabase Auth with middleware protection alongside role-based UI rendering to tailor user experience based on permissions
+- Dynamic dashboard displaying key insights: most popular and profitable services, outstanding payments
+- AI-powered monthly summaries and suggestions using OpenAI LLM API
+- Automated background tasks with Inngest to generate and store monthly summaries
+
+<br>
+Note: _This is a demo project intended to showcase core functionality and integration with modern technologies. It is not fully production-ready — features like robust error handling, loading states, comprehensive validation, and full test coverage are areas for future improvement._

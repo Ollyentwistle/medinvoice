@@ -29,12 +29,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    console.log("inside user route, req: ", req);
     const data = await req.json();
-    console.log(data);
     const { email }: UserBase = data;
-
-    console.log(email);
 
     const newUser = await prisma.user.create({
       data: {
@@ -42,8 +38,6 @@ export async function POST(req: NextRequest) {
         role: "user",
       },
     });
-
-    console.log(newUser);
 
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {

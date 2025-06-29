@@ -7,8 +7,6 @@ export async function addUser(data: UserBase) {
     body: JSON.stringify(data),
   });
 
-  console.log(res);
-
   if (!res.ok) throw new Error("Failed to add user");
   return res.json();
 }
@@ -21,8 +19,6 @@ export async function getUser(email: string) {
       headers: { "Content-Type": "application/json" },
     }
   );
-
-  console.log(res);
 
   if (!res.ok) throw new Error("Failed to fetch user");
   return res.json();

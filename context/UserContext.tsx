@@ -21,7 +21,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
       const email = session?.user.email;
 
-      console.log(session?.user.email);
       if (!email) return;
 
       const appUser = await getUser(email);

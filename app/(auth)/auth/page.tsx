@@ -31,7 +31,6 @@ export default function AuthPage() {
         setShowConfirmEmail(true);
       } else {
         // TODO - error toaster
-        console.log("Error");
       }
     }
     setIsLoading(false);

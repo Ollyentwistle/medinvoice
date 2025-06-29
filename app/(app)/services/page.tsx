@@ -84,7 +84,6 @@ export default function ServicesPage() {
   };
 
   const handleAddUpdate = (service: ServiceBase) => {
-    console.log("service to add: ", service);
     if (service.id) {
       updateMutation.mutate({ id: service.id, data: service });
     } else {

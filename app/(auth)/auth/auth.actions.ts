@@ -43,7 +43,7 @@ export async function signUp({ email, password }: AccountCredentails) {
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    console.log("error: ", error);
+    console.error(error);
     return false;
   }
 
@@ -65,7 +65,6 @@ export async function signOut() {
 
 export async function addUserIfDoesntExist(email: string) {
   const user = await getUser(email);
-  console.log(user);
   if (!!user) {
     return;
   }

@@ -8,13 +8,11 @@ export async function fetchServices(): Promise<Service[]> {
 }
 
 export async function addService(data: ServiceBase) {
-  console.log("adding service");
   const res = await fetch("/api/services", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  console.log(res);
   if (!res.ok) throw new Error("Failed to add service");
   return res.json();
 }

@@ -16,7 +16,7 @@ export interface GenerateSummaryProps {
 export async function generateSummary(
   summaryData: GenerateSummaryProps
 ): Promise<string> {
-  const response = await fetch("/api/dashboard/generate-summary", {
+  const response = await fetch("/api/summary", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

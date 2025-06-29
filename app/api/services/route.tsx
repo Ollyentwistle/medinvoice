@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { ServiceBase } from "@/models/services";
 import { NextRequest, NextResponse } from "next/server";
+import { getAllServices } from "./services.funcs";
 
 export async function GET(req: NextRequest) {
   try {
-    const services = await prisma.service.findMany();
+    const services = await getAllServices();
 
     return NextResponse.json(services, { status: 200 });
   } catch (error) {

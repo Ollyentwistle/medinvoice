@@ -1,10 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { PaymentBase } from "@/models/payments";
 import { NextRequest, NextResponse } from "next/server";
+import { getAllPayments } from "./payments.funcs";
 
 export async function GET(req: NextRequest) {
   try {
-    const payments = await prisma.payment.findMany();
+    const payments = await getAllPayments();
 
     return NextResponse.json(payments, { status: 200 });
   } catch (error) {

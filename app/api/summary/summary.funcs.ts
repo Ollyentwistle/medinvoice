@@ -1,14 +1,26 @@
 import { GenerateSummaryProps } from "@/app/(app)/dashboard/dashboard.queries";
-import { NextApiRequest, NextApiResponse } from "next";
-import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(req: NextRequest) {
-  const data = await req.json();
+// export async function generateSummaryPrompt(data: GenerateSummaryProps): Promise<string> {
+//     const {
+//     totalEarnings,
+//     mostPopularService,
+//     mostProfitableService,
+//     unpaidCount,
+//     overdueCount,
+//   }: GenerateSummaryProps = data;
+
+//   cons
+// }
+
+export async function generateNewSummary(
+  data: GenerateSummaryProps
+): Promise<string> {
   const {
     totalEarnings,
     mostPopularService,
@@ -20,8 +32,7 @@ export async function POST(req: NextRequest) {
   const now = new Date();
   const monthName = now.toLocaleString("default", { month: "long" });
 
-  try {
-    const prompt = `
+  const prompt = `
         Generate a concise monthly summary for a clinic for the month of ${monthName} with the following data:
         - Total earnings: £${totalEarnings}
         - Most popular service: ${
@@ -44,21 +55,24 @@ export async function POST(req: NextRequest) {
         Please provide only 2-3 sentences in plain text without any markdown, bullet points, or special formatting. Include any useful insights and recommendations if deemed necessary.
     `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-    });
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+  });
 
-    const summary =
-      response.choices[0].message?.content?.trim() ??
-      "Failed to generate summary, please try again...";
+  const summary =
+    response.choices[0].message?.content?.trim() ??
+    "Failed to generate summary, please try again...";
 
-    return NextResponse.json(summary, { status: 200 });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "OpenAI API request failed" },
-      { status: 500 }
-    );
-  }
+  return summary;
+}
+
+export async function addMonthlySummary(summary: string): Promise<boolean> {
+  const generatedSummary = await prisma.monthlySummary.create({
+    data: {
+      summary,
+    },
+  });
+
+  return true;
 }

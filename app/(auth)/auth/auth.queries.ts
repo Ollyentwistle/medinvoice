@@ -16,13 +16,10 @@ export async function addUser(data: UserBase) {
 }
 
 export async function getUser(email: string) {
-  const res = await fetch(
-    `${baseUrl}/api/users?email=${encodeURIComponent(email)}`,
-    {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+  const res = await fetch(`${baseUrl}/api/users?email=${email}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
 
   if (!res.ok) throw new Error("Failed to fetch user");
   return res.json();

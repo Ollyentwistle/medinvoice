@@ -37,8 +37,6 @@ export default function PatientsPage() {
 
   const { user } = useUser();
 
-  console.log(user, "<<<<<<<<<<<<");
-
   const { data: patients = [], isLoading } = useQuery({
     queryKey: ["patients"],
     queryFn: fetchPatients,
@@ -163,26 +161,30 @@ export default function PatientsPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleUpdatePress({
-                            id: patient.id,
-                            email: patient.email,
-                            name: patient.name,
-                          })
-                        }
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => deleteMutation.mutate(patient.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {user?.role == "admin" && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleUpdatePress({
+                                id: patient.id,
+                                email: patient.email,
+                                name: patient.name,
+                              })
+                            }
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deleteMutation.mutate(patient.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

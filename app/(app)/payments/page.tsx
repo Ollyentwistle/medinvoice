@@ -29,6 +29,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useUser } from "@/context/UserContext";
 import { Payment } from "@/lib/generated/prisma/client";
 import { PaymentBase } from "@/models/payments";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -53,6 +54,8 @@ export default function PaymentsPage() {
     date: new Date().toISOString().split("T")[0],
     isPaid: false,
   });
+
+  const { user } = useUser();
 
   const resetPaymentBase = () => {
     setPaymentBase({

@@ -24,6 +24,7 @@ import {
   fetchServices,
   updateService,
 } from "./services.queries";
+import { useUser } from "@/context/UserContext";
 
 export default function ServicesPage() {
   const queryClient = useQueryClient();
@@ -33,6 +34,8 @@ export default function ServicesPage() {
     name: "",
     price: 0,
   });
+
+  const { user } = useUser();
 
   const { data: services = [], isLoading } = useQuery({
     queryKey: ["services"],
@@ -157,26 +160,30 @@ export default function ServicesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          handleUpdatePress({
-                            id: service.id,
-                            name: service.name,
-                            price: service.price,
-                          })
-                        }
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => deleteMutation.mutate(service.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {user?.role == "admin" && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleUpdatePress({
+                                id: service.id,
+                                name: service.name,
+                                price: service.price,
+                              })
+                            }
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deleteMutation.mutate(service.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

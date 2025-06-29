@@ -1,11 +1,10 @@
 "use client";
 
+import { EmailConfirmCard } from "@/app/components/EmailConfirmCard/EmailConfirmCard";
 import TabSelect from "@/app/components/TabSelect/TabSelect";
+import { Stethoscope } from "lucide-react";
 import { useState } from "react";
 import { signIn, signUp } from "./auth.actions";
-import { Stethoscope } from "lucide-react";
-import { EmailConfirmCard } from "@/app/components/EmailConfirmCard/EmailConfirmCard";
-import { addUser, getUser } from "./auth.queries";
 
 export default function AuthPage() {
   const [selectedOption, setSelectedOption] = useState<string>("Sign in");
@@ -25,7 +24,7 @@ export default function AuthPage() {
   const handleClick = async () => {
     setIsLoading(true);
     if (selectedOption === "Sign in") {
-      const successful = await signIn({ email, password });
+      await signIn({ email, password });
     } else {
       const successful = await signUp({ email, password });
       if (successful) {

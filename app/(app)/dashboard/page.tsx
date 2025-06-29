@@ -29,10 +29,13 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { fetchPayments } from "../payments/payments.queries";
 import { fetchServices } from "../services/services.queries";
 import { generateSummary } from "./dashboard.queries";
+import { useUser } from "@/context/UserContext";
 
 export default function DashboardPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiSummary, setAiSummary] = useState("");
+
+  const { user } = useUser();
 
   const { data: payments = [] } = useQuery({
     queryKey: ["payments"],
@@ -357,7 +360,7 @@ export default function DashboardPage() {
         <CardContent className="space-y-4">
           <Button
             onClick={handleGenerateSummary}
-            disabled={isGenerating || !!aiSummary}
+            disabled={(isGenerating || !!aiSummary) && user?.role != "admin"}
             className="w-full bg-blue-600 hover:bg-blue-500 sm:w-auto"
           >
             {isGenerating

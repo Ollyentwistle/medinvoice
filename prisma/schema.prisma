@@ -50,3 +50,9 @@ model User {
   role        String
   createdAt   DateTime  @default(now())
 }
+
+model MonthlySummary {
+  id          Int       @id @default(autoincrement())
+  summary     String
+  createdAt   DateTime  @default(now())
+}

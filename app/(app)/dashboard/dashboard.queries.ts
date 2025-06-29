@@ -13,7 +13,7 @@ export interface GenerateSummaryProps {
   overdueCount: number;
 }
 
-export async function generateSummary(
+export async function getSummary(
   summaryData: GenerateSummaryProps
 ): Promise<string> {
   const response = await fetch("/api/summary", {

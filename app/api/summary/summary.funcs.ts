@@ -6,19 +6,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// export async function generateSummaryPrompt(data: GenerateSummaryProps): Promise<string> {
-//     const {
-//     totalEarnings,
-//     mostPopularService,
-//     mostProfitableService,
-//     unpaidCount,
-//     overdueCount,
-//   }: GenerateSummaryProps = data;
-
-//   cons
-// }
-
-export async function generateNewSummary(
+export async function generateSummary(
   data: GenerateSummaryProps
 ): Promise<string> {
   const {
@@ -67,12 +55,14 @@ export async function generateNewSummary(
   return summary;
 }
 
-export async function addMonthlySummary(summary: string): Promise<boolean> {
-  const generatedSummary = await prisma.monthlySummary.create({
-    data: {
-      summary,
-    },
-  });
-
-  return true;
+export async function addMonthlySummary(summary: string): Promise<void> {
+  try {
+    await prisma.monthlySummary.create({
+      data: {
+        summary,
+      },
+    });
+  } catch (error) {
+    console.error("Error adding monthly summary", error);
+  }
 }

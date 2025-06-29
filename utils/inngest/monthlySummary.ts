@@ -5,11 +5,11 @@ import {
   getTotalEarnings,
   getUnpaidInvoices,
 } from "@/app/(app)/dashboard/dashboard.funcs";
-import { getAllPayments } from "@/app/api/payments/payments.funcs";
-import { getAllServices } from "@/app/api/services/services.funcs";
+import { fetchAllPayments } from "@/app/api/payments/payments.funcs";
+import { fetchAllServices } from "@/app/api/services/services.funcs";
 import {
   addMonthlySummary,
-  generateNewSummary,
+  generateSummary,
 } from "@/app/api/summary/summary.funcs";
 import { inngest } from "@/lib/inngest";
 
@@ -28,8 +28,8 @@ export const monthlySummary = inngest.createFunction(
         return { skipped: true }; // only run on the final each of the onth
       }
 
-      const payments = await getAllPayments();
-      const services = await getAllServices();
+      const payments = await fetchAllPayments();
+      const services = await fetchAllServices();
 
       const totalEarnings = getTotalEarnings(payments, services);
 
@@ -43,7 +43,7 @@ export const monthlySummary = inngest.createFunction(
         services
       );
 
-      const summary = await generateNewSummary({
+      const summary = await generateSummary({
         totalEarnings,
         mostPopularService: mostPopularServiceData
           ? {

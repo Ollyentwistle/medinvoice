@@ -37,7 +37,7 @@ import {
   getTotalEarnings,
   getUnpaidInvoices,
 } from "./dashboard.funcs";
-import { generateSummary } from "./dashboard.queries";
+import { getSummary } from "./dashboard.queries";
 
 export default function DashboardPage() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -71,7 +71,7 @@ export default function DashboardPage() {
 
   const handleGenerateSummary = async () => {
     setIsGenerating(true);
-    const summary = await generateSummary({
+    const summary = await getSummary({
       totalEarnings,
       mostPopularService: mostPopularServiceData
         ? {
